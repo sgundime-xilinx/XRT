@@ -3,8 +3,8 @@
 
 //XRT/Local includes
 #include "em_defines.h"
-#include "../hwemu/src/hwemu_shim.h"
-#include "../swemu/src/swemu_shim.h"
+//#include "../hwemu/src/hwemu_shim.h"
+//#include "../swemu/src/swemu_shim.h"
 #include "xbar_sys_parameters.h"
 #include "xclbin.h"
 #include "xclfeatures.h"
@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sstream>
 #include <tuple>
-#include <variant>
+//#include <variant>
 #include <vector>
 
 namespace xclemulation{
@@ -106,7 +106,7 @@ struct sParseLog
   std::atomic<bool> mFileExists;
   std::vector<std::string> mMatchedStrings;
   eEmulationType mEmuType;
-  std::variant<hwemu_shim*, swemu_shim*> mShimPtr;
+  //std::variant<hwemu_shim*, swemu_shim*> mShimPtr;
   
   sParseLog(const std::string& iDeviceLog, eEmulationType iType, const std::vector<std::string>& iMatchedStrings)
       : mFileName(iDeviceLog)
