@@ -15,9 +15,6 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <cctype>
 
-#define DEBUG_MSGS(format, ...)
-//#define DEBUG_MSGS(format, ...) printf(format, ##__VA_ARGS__)
-
 namespace xclcpuemhal2 {
 
   std::map<unsigned int, CpuemShim*> devices;

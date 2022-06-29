@@ -30,6 +30,13 @@
 #include <tuple>
 #include <vector>
 
+#define DEBUG_MSGS(format, ...)
+//#define DEBUG_MSGS(format, ...) printf(format, ##__VA_ARGS__)
+
+#define DEBUG_MSGS_COUT(format, ...)
+//#define DEBUG_MSGS(format, ...) std::cout(format, ##__VA_ARGS__)
+
+
 namespace xclemulation{
   
   // KB

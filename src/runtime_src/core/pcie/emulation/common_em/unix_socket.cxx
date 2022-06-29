@@ -130,10 +130,8 @@ void unix_socket::start_server(double timeout_insec, bool fatal_error)
 ssize_t unix_socket::sk_write(const void *wbuf, size_t count)
 {
   if (false == server_started.load())
-  {
-    std::cerr << "\n unix_socket::sk_write failed, no socket connection established.\n";
     return -1;
-  }
+  
   ssize_t r;
   ssize_t wlen = 0;
   auto buf = reinterpret_cast<const unsigned char *>(wbuf);
@@ -158,14 +156,14 @@ ssize_t unix_socket::sk_write(const void *wbuf, size_t count)
 
   do
   {
-    
     // send() system API is a non-blocking call based on flags set.
     if ((r = send(fd, buf + wlen, count - wlen, flags)) < 0)
     {
       // I did not get data, alright Let me recall.
       if (errno == EAGAIN || errno == EWOULDBLOCK)
       {
-        std::cerr<<"\n unable to send data to peer\n";
+       // Data might not be received by timedout period, so Let's try
+       // If socket is not live then monitor_socket_thread will detect and while condition fails.
         continue;
       }
       // something fishy! so let's return.
@@ -186,11 +184,8 @@ ssize_t unix_socket::sk_write(const void *wbuf, size_t count)
 ssize_t unix_socket::sk_read(void *rbuf, size_t count)
 {
   if (false == server_started.load())
-  {
-    std::cerr << "\n unix_socket::sk_read failed, no socket connection established.\n";
     return -1;
-  }
-
+  
   ssize_t r;
   ssize_t rlen = 0;
   auto buf = reinterpret_cast<unsigned char *>(rbuf);
@@ -220,8 +215,12 @@ ssize_t unix_socket::sk_read(void *rbuf, size_t count)
     {
       // Alright! I did not get any data in the timedout period, so Let me retry again!!!
       if (errno == EAGAIN || errno == EWOULDBLOCK)
+      {
+        // Data might not be received by timedout period, so Let's try
+        // If socket is not live then monitor_socket_thread will detect and while condition fails.
         continue; // OMG! data is not received, timedout? ok, Let's try
-      
+      }
+        
       return -1; // other failures, then let me stop calling recv.
     }
     rlen += r;
@@ -269,7 +268,7 @@ void unix_socket::monitor_socket_thread() {
     mpoll_on_filedescriptor = {fd, POLLERR, 0};                 // monitor client socket file descriptor for a state change.
     auto retval = poll(&mpoll_on_filedescriptor, 1, 500);       // Let's do polling on it for utmost 500 ms
     if ( retval < 0 ) {
-      std::cerr<<"\n poll is failed";
+      DEBUG_MSGS("%s, %d (poll is failed.)\n", __func__, __LINE__);
       continue;
     }
     if (retval == 0)       
@@ -277,14 +276,14 @@ void unix_socket::monitor_socket_thread() {
     
     // The same logic can be implemented by looking at ~POLLIN or POLLRDHUP & POLLERR & POLLHUP
     if( mpoll_on_filedescriptor.revents & POLLHUP ) {
-      std::cerr<<"\n Client socket state has changed & it is not readable anymore! So application will exit now.";
+      DEBUG_MSGS("%s, %d (Client socket state has changed & it is not readable anymore! So application will exit now.)\n", __func__, __LINE__);
       m_is_socket_live.store(false);
       server_started.store(false);                              // Let's other monitoring threads exit
       break;
     }
 
     if ( mpoll_on_filedescriptor.revents & POLLERR ) {
-      std::cerr<< "\n Hurrah! client connection is lost ::";
+      DEBUG_MSGS("%s, %d (Hurrah! client connection is lost.)\n", __func__, __LINE__);
       m_is_socket_live.store(false);
       server_started.store(false);
       break;
