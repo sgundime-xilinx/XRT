@@ -266,7 +266,7 @@ void unix_socket::monitor_socket_thread() {
   {
     if (false == server_started.load())
     {
-      std::cerr << "\n socket connect is not established/broken \n";
+      DEBUG_MSGS_COUT( " Either socket connection is NOT established or Simulator just now Closed.");
       break;
     }
 

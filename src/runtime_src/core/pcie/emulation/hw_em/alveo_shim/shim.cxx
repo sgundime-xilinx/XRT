@@ -1809,6 +1809,7 @@ namespace xclhwemhal2 {
     if (mLogStream.is_open()) {
       mLogStream.close();
     }
+    sock.reset();
   }
 
   int HwEmShim::resetProgram(bool saveWdb)
@@ -1952,7 +1953,7 @@ namespace xclhwemhal2 {
     }
     //ProfilerStop();
 
-    sock.reset();
+    //sock.reset();
 
     PRINTENDFUNC;
     if(mMBSch && mCore)
@@ -3869,9 +3870,7 @@ void HwEmShim::hostMemAccessThread() {
         sock_ret = mq2h_helper_ptr->connect_sock();
         count++;
     }
-    if (not sock_ret) {
-      std::cout<<"\n unable to get a reliable socket connection, ideally should exit here. select call took care. \n";
-    }
+    
     int r =0;
     while (mHostMemAccessThreadStarted && r >= 0) {
         try {
