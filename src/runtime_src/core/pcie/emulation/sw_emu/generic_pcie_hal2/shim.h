@@ -185,7 +185,8 @@ namespace xclswemuhal2
     //int xclLoadBitstream(const char *fileName);
     int xclUpgradeFirmware(const char *fileName);
     int xclBootFPGA();
-    void xclClose();
+    void cleanAll();
+    void xclClose(bool endofsimulation=false);
     void resetProgram(bool callingFromClose = false);
 
     // Raw read/write
@@ -662,7 +663,7 @@ namespace xclswemuhal2
         if (line.find(matchString) != std::string::npos)
         {
           std::cout << "Received request to end the application. Exiting the application." << std::endl;
-          mCpuShimPtr->xclClose();
+          mCpuShimPtr->xclClose(true);
         }
       }
     }

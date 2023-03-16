@@ -526,6 +526,7 @@ namespace xclswemuhal2
       }
     }
     sock = new unix_socket("EMULATION_SOCKETID");
+    sock->monitor_socket();
   }
 
   void SwEmuShim::getCuRangeIdx()
@@ -815,8 +816,10 @@ namespace xclswemuhal2
       // This determines the whether we are running the sw_emu interacting with the x86sim process or the aiesim process
       if (bf::exists(fp) && !bf::is_empty(fp))
         aiesim_sock = nullptr;
-      else
+      else {
         aiesim_sock = new unix_socket("AIESIM_SOCKETID");
+        //aiesim_sock->monitor_socket();
+      }
 
     }
 
@@ -1353,9 +1356,28 @@ namespace xclswemuhal2
     }
   }
 
-  void SwEmuShim::xclClose()
+  void SwEmuShim::xclClose(bool endofsimulation) {
+    if (endofsimulation)
+    {
+      // This abrupt termination of application will throw 
+      // unwanted errors either by google protobuf
+      // or any other failures. So Let's expect them but not 
+      // print them on console.
+      close(STDOUT_FILENO);
+      close(STDERR_FILENO);
+      // This does not require mutex lock for performing
+      // xclclose call.
+      cleanAll();
+    }
+    else {
+      std::lock_guard lk(mApiMtx);
+      cleanAll();
+    }
+  }
+
+  
+  void SwEmuShim::cleanAll()
   {
-    std::lock_guard lk(mApiMtx);
     if (mLogStream.is_open())
       mLogStream << __func__ << ", " << std::this_thread::get_id() << std::endl;
 
