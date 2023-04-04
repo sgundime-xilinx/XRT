@@ -451,6 +451,7 @@ namespace xclswemuhal2
         }
 
         std::string modelDirectory("");
+        /*
 #if defined(RDIPF_aarch64)
         if (boost::filesystem::exists(xilinxInstall + "/data/emulation/unified/sw_emu/zynqu/model/genericpciemodel"))
           modelDirectory = xilinxInstall + "/data/emulation/unified/sw_emu/zynqu/model/genericpciemodel";
@@ -468,7 +469,12 @@ namespace xclswemuhal2
         else
           modelDirectory = xilinxInstall + "/data/emulation/unified/cpu_em/generic_pcie/model/genericpciemodel";
 #endif
-
+*/
+        if (boost::filesystem::exists(xilinxInstall + "/data/emulation/unified/sw_emu/generic_pcie/model/genericpciemodel"))
+          modelDirectory = xilinxInstall + "/data/emulation/unified/sw_emu/generic_pcie/model/genericpciemodel";
+        else
+          std::cerr<<"\n ERROR : [SW-EM 18] genericpciemodel binary path is not existing" << std::endl;
+        
         FILE *filep;
         if ((filep = fopen(modelDirectory.c_str(), "r")) != NULL)
         {
